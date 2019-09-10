@@ -2,12 +2,98 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>AngularIpaddress</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>Add/Remove IPaddress Fields Dynamically</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.11/ngStorage.min.js"></script>
 </head>
 <body>
-  <app-root></app-root>
+  <app-root>
+    <br />
+        <h3 align="center">Add/Remove IPaddress Fields Dynamically</h3>
+       <br />
+       <div ng-app="dynamicApp" ng-controller="dynamicController" class="container" 
+       style="width:600px;" ng-init="fetchData()">
+        
+        <form name="ipform">
+         <fieldset ng-repeat="row in rows">
+          <div class="form-group">
+           <label>Enter the Ip Address</label>
+           <div class="row">
+            <div class="col-md-9">
+             <input type="text" name="ip_addresses" class="form-control"  
+             ng-model="formData.ip_address[$index + 1]" ng-blur="ValidateIPaddress()" />
+            </div>
+            <div class="col-md-3">
+             <button type="button" name="remove" ng-model="row.remove" class="btn btn-danger btn-sm" 
+                 ng-click="removeRow()"><span class="glyphicon glyphicon-minus"></span></button>
+            </div>
+           </div>
+          </div>
+        </fieldset>
+         <div class="form-group">
+          <button type="button" name="add_more" class="btn btn-success" 
+          ng-click="addRow()" ng-disabled="ValidateIPaddress()" disabled><span class="glyphicon glyphicon-plus"></span> Add</button>
+          <button type="button" name="save" class="btn btn-info" 
+          ng-click="saveData()" ng-disabled="ValidateIPaddress()" disabled>Save</button>
+         </div>
+        </form>
+       </div>
+  </app-root>
 </body>
 </html>
+<script>
+  var app = angular.module('dynamicApp', ['ngStorage']);
+  
+  app.controller('dynamicController', function($scope, $localStorage){
+  
+   $scope.success = false;
+   $scope.error = false;
+   
+   let counter = 1;
+   $scope.fetchData = function(){
+      $scope.namesData = $scope.formData;
+   };
+  
+   $scope.rows = [{name: 'ip_addresses[]', name: 'remove'}];
+  
+   $scope.addRow = function(){
+    var id = $scope.rows.length + 1;
+    $scope.rows.push({'id':'dynamic'+id});
+    counter +=1;
+   };
+  
+   $scope.removeRow = function(row){
+    var index = $scope.rows.indexOf(row);
+    
+    if (counter == 1) {
+      $scope.formData.ip_address[counter]='';
+    }
+    else {
+    counter -=1;
+    $scope.rows.splice(index, 1);
+   }             
+   };
+  
+   $scope.formData = {};
+  
+   $scope.saveData = function(){
+      $localStorage.ipaddresses=$scope.formData;
+      
+      $scope.rows = [{name: 'ip_addresses[]', name: 'remove'}];
+      $scope.fetchData();
+      $scope.formData = {};
+   };
+   $scope.ValidateIPaddress = function() {  
+      if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test($scope.formData.ip_address[counter])) {  
+          return false;
+      }  
+      else {
+          $scope.errorMessage = $scope.formData.error;
+          return true;
+      }
+  }
+  
+  });
+  
+  </script>
